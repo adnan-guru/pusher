@@ -26,9 +26,11 @@ export const styles = {
   },
   content: {
     display: "flex",
-    alignItems: "center",
+    // alignItems: "center",
     flexDirection: "column",
     // backgroundColor: "red",
+    width: "40%",
+    margin: "auto",
     padding: "20px",
     flex: 1,
   },
@@ -40,8 +42,12 @@ export const styles = {
   },
   feedList: {
     marginTop: "20px",
+    transition: "2.5s ease-in-out",
   },
   feedItem: {
+    paddingTop: "10px",
+    paddingBottom: "10px",
+
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",

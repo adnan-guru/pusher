@@ -1,31 +1,40 @@
-import React, { useState } from "react";
+import React, { useRef, memo } from "react";
 import { styles } from "./styles";
 import socketClient from "socket.io-client";
 import moment from "moment";
+import { useSelector, useDispatch } from "react-redux";
 
 function ActivityFeed() {
+  const SERVER = "localhost:4000";
+  const feeds = useSelector((state) => state.feeds);
+  const dispatch = useDispatch();
+
+  const socketClientRef = useRef();
+
   const clearFeed = () => {
     setTimeout(() => {
-      setFeed([]);
-    }, 3000);
+      dispatch({ type: "CLEAR_FEEDS" });
+    }, 6000);
   };
-  const [feed, setFeed] = useState([]);
-  const SERVER = "http://127.0.0.1:4000";
-
+  const addFeed = (feed) => {
+    dispatch({ type: "ADD_FEEDS", payload: feed });
+    clearFeed();
+  };
   React.useEffect(() => {
     var socket = socketClient(SERVER);
     socket.on("FEED_CREATED", (data) => {
-      setFeed([...feed, data.message]);
-      clearFeed();
+      addFeed(data.message);
     });
     socket.on("FEED_UPDATED", (data) => {
-      setFeed([...feed, data.message]);
-      clearFeed();
+      addFeed(data.message);
     });
     socket.on("FEED_DELETED", (data) => {
-      setFeed([...feed, data.message]);
-      clearFeed();
+      addFeed(data.message);
     });
+    socketClientRef.current = socket;
+    return () => {
+      socket.removeAllListeners();
+    };
   }, []);
 
   return (
@@ -37,9 +46,16 @@ function ActivityFeed() {
       <div style={styles.content}>
         <span style={styles.heading}>Realtime Feed with Pusher + React</span>
         <div style={styles.feedList}>
-          {feed.map((item) => {
+          {feeds?.reverse()?.map((item, index) => {
             return (
-              <div key={item.id} style={styles.feedItem}>
+              <div
+                className="feed-list"
+                key={item.id}
+                style={{
+                  ...styles.feedItem,
+                  borderTop: index > 0 ? "1px solid white" : "none",
+                }}
+              >
                 <span
                   style={{ ...styles.feedItemText, color: "rgba(0,0,0,0.7)" }}
                 >
@@ -68,4 +84,4 @@ function ActivityFeed() {
   );
 }
 
-export default ActivityFeed;
+export default memo(ActivityFeed);
